@@ -338,22 +338,19 @@ const RecoveryReports = () => {
       const overallRate = totalLogs > 0 ? Math.round((totalTaken / totalLogs) * 100) : 0;
       setOverallAdherence(overallRate);
 
-      // Calculate recovery percentage based on treatments and medicines adherence
-      // Recovery is calculated from: treatment adherence rate + medicine adherence rate / 2
-      const treatmentAdherenceValues = treatmentStatsData.map((t) => t.adherenceRate);
-      const medicineAdherenceValues = medicineStatsData.map((m) => m.adherenceRate);
+      // Calculate recovery percentage based on daily and weekly medicine intake adherence
+      // Recovery is calculated from: daily adherence (current week) + overall adherence / 2
+      // This gives more weight to recent medicine taking behavior
       
-      const avgTreatmentAdherence = treatmentAdherenceValues.length > 0
-        ? treatmentAdherenceValues.reduce((a, b) => a + b, 0) / treatmentAdherenceValues.length
+      // Calculate average daily adherence from current week
+      const avgDailyAdherence = dailyAdherenceData.length > 0
+        ? Math.round(dailyAdherenceData.reduce((sum, day) => sum + day.adherencePercent, 0) / dailyAdherenceData.length)
         : 0;
       
-      const avgMedicineAdherence = medicineAdherenceValues.length > 0
-        ? medicineAdherenceValues.reduce((a, b) => a + b, 0) / medicineAdherenceValues.length
-        : 0;
-      
-      // Recovery percentage = (treatment adherence + medicine adherence + overall adherence) / 3
-      const recovery = treatmentStatsData.length > 0 && medicineStatsData.length > 0
-        ? Math.round((avgTreatmentAdherence + avgMedicineAdherence + overallRate) / 3)
+      // Recovery percentage = (average daily adherence + overall adherence) / 2
+      // This ensures recovery is tied to actual medicine intake, not just treatment setup
+      const recovery = dailyAdherenceData.length > 0
+        ? Math.round((avgDailyAdherence + overallRate) / 2)
         : overallRate;
       
       setRecoveryPercentage(recovery);
@@ -386,9 +383,8 @@ const RecoveryReports = () => {
       // Log all data for verification
       console.log("📊 Recovery Reports Data:");
       console.log("Overall Adherence:", overallRate);
-      console.log("Average Treatment Adherence:", Math.round(avgTreatmentAdherence));
-      console.log("Average Medicine Adherence:", Math.round(avgMedicineAdherence));
-      console.log("Recovery Percentage (Based on Treatments & Medicines):", recovery);
+      console.log("Average Daily Adherence (Current Week):", avgDailyAdherence);
+      console.log("Recovery Percentage (Based on Daily/Weekly Intake):", recovery);
       console.log("Treatment Stats:", treatmentStatsData);
       console.log("Daily Adherence:", dailyAdherenceData);
       console.log("Medicine Stats:", medicineStatsData.slice(0, 5));
@@ -682,7 +678,7 @@ const RecoveryReports = () => {
                           {recoveryPercentage >= 80 ? "Excellent" : recoveryPercentage >= 60 ? "Good" : "Needs Improvement"}
                         </h3>
                         <p className="text-xs text-muted-foreground mt-2">
-                          Based on treatments & medicines
+                          Based on daily/weekly intake
                         </p>
                       </div>
                       <TrendingUp className="w-8 sm:w-10 lg:w-12 h-8 sm:h-10 lg:h-12 text-green-500/20" />

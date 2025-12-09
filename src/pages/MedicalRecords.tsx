@@ -439,34 +439,35 @@ const MedicalRecords = () => {
                         key={record.id}
                         className="p-3 sm:p-4 rounded-lg border border-border/50 hover:bg-secondary/30 transition-colors mobile-card-spacing w-full max-w-full overflow-hidden"
                       >
-                        <div className="flex items-start gap-4">
+                        <div className="flex items-start gap-3 w-full">
                           <div className="flex-shrink-0 mt-1">
                             {getRecordIcon(record.type)}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold mobile-header">{record.title}</h3>
+                          <div className="flex-1 min-w-0 space-y-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className="font-semibold mobile-header break-words">{record.title}</h3>
                               {getRecordTypeBadge(record.type)}
                             </div>
-                            <p className="text-sm text-muted-foreground mb-2 mobile-text-fix">
+                            <p className="text-sm text-muted-foreground mobile-text-fix break-words">
                               {record.description}
                             </p>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs text-muted-foreground">
-                              <span className="flex items-center gap-1 mobile-text-fix">
-                                <Calendar className="w-3 h-3" />
-                                {new Date(record.date).toLocaleDateString()}
+                            <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+                              <span className="flex items-center gap-1 mobile-text-fix break-words">
+                                <Calendar className="w-3 h-3 flex-shrink-0" />
+                                <span className="break-words">{new Date(record.date).toLocaleDateString()}</span>
                               </span>
-                              <span className="flex items-center gap-1 mobile-text-fix">
-                                <Stethoscope className="w-3 h-3" />
-                                {record.doctor}
+                              <span className="flex items-center gap-1 mobile-text-fix break-words">
+                                <Stethoscope className="w-3 h-3 flex-shrink-0" />
+                                <span className="break-words">{record.doctor}</span>
                               </span>
                             </div>
                           </div>
-                          <div className="flex flex-col sm:flex-row items-center gap-2">
+                          <div className="flex sm:flex-col items-start gap-1 flex-shrink-0">
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDownload(record)}
+                              className="h-8 w-8 p-0"
                             >
                               <Download className="w-4 h-4" />
                             </Button>
@@ -474,6 +475,7 @@ const MedicalRecords = () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDeleteRecord(record.id)}
+                              className="h-8 w-8 p-0"
                             >
                               <Trash2 className="w-4 h-4 text-destructive" />
                             </Button>
