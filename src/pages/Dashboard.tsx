@@ -791,23 +791,23 @@ const Dashboard = () => {
             <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">Overview of your medication and health statistics</p>
           </div>
           <div className="flex items-center gap-2 sm:gap-4 md:gap-6 flex-shrink-0">
-            {/* 12-Hour Time Display - Compact with Seconds */}
-            <div className="hidden sm:flex items-center gap-2 px-3 sm:px-5 py-1.5 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800 backdrop-blur-sm">
+            {/* 12-Hour Time Display - Compact with Seconds - Now Visible on Mobile */}
+            <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-5 py-1 sm:py-1.5 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800 backdrop-blur-sm">
               <div className="flex flex-col items-start">
-                <div className="text-xs font-medium text-blue-600 dark:text-blue-400">Current Time</div>
-                <div className="flex items-center gap-1">
+                <div className="text-[10px] sm:text-xs font-medium text-blue-600 dark:text-blue-400 hidden sm:block">Current Time</div>
+                <div className="flex items-center gap-0.5 sm:gap-1">
                   <div className="text-xs sm:text-base md:text-lg font-bold text-blue-600 dark:text-blue-400 font-mono">
                     {(displayTime.getHours() % 12 || 12).toString().padStart(2, '0')}:
-                    {displayTime.getMinutes().toString().padStart(2, '0')}:
-                    {displayTime.getSeconds().toString().padStart(2, '0')}
+                    {displayTime.getMinutes().toString().padStart(2, '0')}
+                    <span className="hidden sm:inline">:{displayTime.getSeconds().toString().padStart(2, '0')}</span>
                   </div>
-                  <div className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                  <div className="text-[10px] sm:text-xs font-semibold text-blue-600 dark:text-blue-400">
                     {displayTime.getHours() >= 12 ? 'PM' : 'AM'}
                   </div>
                 </div>
               </div>
-              <div className="w-px h-6 sm:h-8 bg-blue-200 dark:bg-blue-800" />
-              <div className="text-xs font-semibold text-blue-700 dark:text-blue-300">
+              <div className="w-px h-6 sm:h-8 bg-blue-200 dark:bg-blue-800 hidden sm:block" />
+              <div className="text-[10px] sm:text-xs font-semibold text-blue-700 dark:text-blue-300 hidden sm:block">
                 {displayTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               </div>
             </div>

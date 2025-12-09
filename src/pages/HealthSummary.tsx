@@ -130,7 +130,7 @@ const HealthSummary = () => {
 
       console.log("✅ Profile response:", { profile, error: profileError });
 
-      // Step 4: Fetch intake logs
+      // Step 4: Fetch intake logs (last 30 days for charts)
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -141,6 +141,26 @@ const HealthSummary = () => {
         .gte("taken_time", thirtyDaysAgo.toISOString()) as any);
 
       console.log("✅ Logs response:", { count: logs?.length, error: logsError });
+      
+      // Also fetch current week logs for recovery score (matching RecoveryReports logic)
+      const today = new Date();
+      const currentDayOfWeek = today.getDay();
+      const weekStart = new Date(today);
+      weekStart.setDate(today.getDate() - currentDayOfWeek);
+      weekStart.setHours(0, 0, 0, 0);
+      
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 7);
+      weekEnd.setHours(23, 59, 59, 999);
+
+      const { data: weekLogs, error: weekLogsError } = await (supabase
+        .from("intake_logs" as any)
+        .select("*")
+        .eq("user_id", user?.id)
+        .gte("taken_time", weekStart.toISOString())
+        .lte("taken_time", weekEnd.toISOString()) as any);
+      
+      console.log("✅ Week Logs response:", { count: weekLogs?.length, error: weekLogsError });
 
       if (logsError) {
         console.error("❌ Error fetching logs:", logsError);
@@ -195,16 +215,72 @@ const HealthSummary = () => {
 
       setHealthMetrics(metricsData);
 
+      // Calculate recovery score based on CURRENT WEEK daily adherence (matching RecoveryReports)
+      // Group week logs by date to calculate daily adherence for current week only
+      const weekGroupedByDate: { [key: string]: any } = {};
+      const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const totalMedicinesCount = medicines.length || 0;
+      
+      // Initialize current week (Sunday to Saturday)
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(weekStart);
+        date.setDate(weekStart.getDate() + i);
+        const dateStr = date.toISOString().split("T")[0];
+        weekGroupedByDate[dateStr] = {
+          date: dayNames[date.getDay()],
+          takenIds: new Set<string>(),
+          adherencePercent: 0,
+        };
+      }
+      
+      // Count unique medicines taken per day in current week
+      weekLogs?.forEach((log: any) => {
+        const dateStr = log.taken_time.split("T")[0];
+        const daily = weekGroupedByDate[dateStr];
+        if (daily && log.status === "taken") {
+          daily.takenIds.add(log.medicine_id);
+        }
+      });
+      
+      // Calculate adherence percent for each day
+      const weekDailyAdherenceData = Object.values(weekGroupedByDate).map((day: any) => {
+        const takenCount = day.takenIds.size;
+        return {
+          date: day.date,
+          adherencePercent: totalMedicinesCount > 0 
+            ? Math.round((takenCount / totalMedicinesCount) * 100) 
+            : 0,
+        };
+      });
+      
+      // Calculate average daily adherence from current week (same as RecoveryReports)
+      const avgDailyAdherence = weekDailyAdherenceData.length > 0
+        ? Math.round(weekDailyAdherenceData.reduce((sum: number, day: any) => sum + day.adherencePercent, 0) / weekDailyAdherenceData.length)
+        : 0;
+      
+      // Recovery percentage = (average daily adherence + overall adherence) / 2
+      const recoveryScore = weekDailyAdherenceData.length > 0
+        ? Math.round((avgDailyAdherence + overallAdherence) / 2)
+        : overallAdherence;
+
       const finalStats = {
         totalTreatments: treatments?.length || 0,
         activeTreatments: treatments?.length || 0,
         totalMedicines: medicines.length || 0,
         overallAdherence,
         averageBMI,
-        recoveryScore: Math.round((overallAdherence * 0.7 + 75 * 0.3) / 1),
+        recoveryScore,
       };
 
       console.log("✅ FINAL STATS:", finalStats);
+      console.log("📊 Recovery Calculation (Current Week):", {
+        weekStart: weekStart.toISOString(),
+        weekEnd: weekEnd.toISOString(),
+        avgDailyAdherence,
+        overallAdherence,
+        recoveryScore,
+        weekDailyData: weekDailyAdherenceData,
+      });
       setSummaryStats(finalStats);
     } catch (error) {
       console.error("❌ Error fetching health summary:", error);

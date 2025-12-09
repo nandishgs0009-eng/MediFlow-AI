@@ -21,6 +21,8 @@ import {
   Layers,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
+import "@/styles/mobile-responsive.css";
 
 interface Patient {
   id: string;
@@ -53,7 +55,8 @@ interface TreatmentWithMedicines extends Treatment {
 
 const AdminTreatments = () => {
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const isMobile = useIsMobile();
+  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [loading, setLoading] = useState(true);
   const [adminEmail, setAdminEmail] = useState("");
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -194,7 +197,7 @@ const AdminTreatments = () => {
       <aside
         className={`${
           sidebarOpen ? "w-64" : "w-20"
-        } bg-card border-r border-border/50 transition-all duration-300 flex flex-col fixed left-0 top-0 h-screen z-40`}
+        } ${isMobile && !sidebarOpen ? '-translate-x-full' : ''} bg-card border-r border-border/50 transition-all duration-300 flex flex-col fixed left-0 top-0 h-screen z-40`}
       >
         {/* Logo */}
         <div className="p-6 border-b border-border/50 flex items-center justify-between">
@@ -265,12 +268,22 @@ const AdminTreatments = () => {
       </aside>
 
       {/* Main Content */}
-      <div className={`flex-1 ${sidebarOpen ? "ml-64" : "ml-20"} transition-all duration-300`}>
+      <div className={`flex-1 ${isMobile ? 'ml-0' : sidebarOpen ? "ml-64" : "ml-20"} transition-all duration-300`}>
         {/* Top Navigation */}
         <nav className="bg-card border-b border-border/50 px-4 sm:px-6 md:px-8 py-3 sm:py-4 sticky top-0 z-30 flex items-center justify-between gap-2 sm:gap-4">
-          <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold truncate">Treatments Management</h1>
-            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">Manage patient treatments and medicines</p>
+          <div className="flex items-center gap-2 min-w-0">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className={`${isMobile ? 'flex' : 'md:hidden'} flex-shrink-0`}
+            >
+              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </Button>
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold truncate">Treatments Management</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 hidden sm:block">Manage patient treatments and medicines</p>
+            </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-4 shrink-0">
             <span className="text-xs sm:text-sm text-muted-foreground hidden sm:inline">
@@ -289,7 +302,7 @@ const AdminTreatments = () => {
         </nav>
 
         {/* Content */}
-        <div className="p-4 sm:p-6 md:p-8">
+        <div className="p-3 sm:p-4 md:p-6 lg:p-8 mobile-content mobile-text-container max-w-full overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">

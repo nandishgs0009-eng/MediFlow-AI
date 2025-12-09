@@ -26,6 +26,8 @@ import {
   Pill,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
+import "@/styles/mobile-responsive.css";
 import {
   AreaChart,
   Area,
@@ -86,7 +88,8 @@ interface PatientReport {
 
 const AdminReports = () => {
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const isMobile = useIsMobile();
+  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [loading, setLoading] = useState(true);
   const [adminEmail, setAdminEmail] = useState("");
   const [patientReports, setPatientReports] = useState<PatientReport[]>([]);
@@ -305,20 +308,64 @@ const AdminReports = () => {
             adherenceRate: stats.taken + stats.missed > 0 ? Math.round((stats.taken / (stats.taken + stats.missed)) * 100) : 0,
           }));
 
-          // Calculate recovery percentage (same logic as patient RecoveryReports)
-          const treatmentAdherenceValues = treatmentStatsData.map((t) => t.adherenceRate);
-          const medicineAdherenceValues = medicineStats.map((m) => m.adherenceRate);
-
-          const avgTreatmentAdherence = treatmentAdherenceValues.length > 0
-            ? treatmentAdherenceValues.reduce((a, b) => a + b, 0) / treatmentAdherenceValues.length
+          // Calculate recovery percentage based on daily/weekly medicine intake adherence
+          // Same logic as patient RecoveryReports and HealthSummary
+          // Recovery = (average daily adherence from current week + overall adherence) / 2
+          
+          // Calculate daily adherence for current week
+          const currentDate = new Date();
+          const currentDayOfWeek = currentDate.getDay();
+          const weekStart = new Date(currentDate);
+          weekStart.setDate(currentDate.getDate() - currentDayOfWeek);
+          weekStart.setHours(0, 0, 0, 0);
+          
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekEnd.getDate() + 7);
+          weekEnd.setHours(23, 59, 59, 999);
+          
+          const totalMedicinesCount = (medicinesDetailsData || []).length;
+          const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+          const weekDailyMap = new Map<string, { takenIds: Set<string>; dayName: string }>();
+          
+          // Initialize current week (Sunday to Saturday)
+          for (let i = 0; i < 7; i++) {
+            const date = new Date(weekStart);
+            date.setDate(weekStart.getDate() + i);
+            const dateStr = date.toISOString().split("T")[0];
+            const dayName = dayNames[date.getDay()];
+            weekDailyMap.set(dateStr, { takenIds: new Set<string>(), dayName });
+          }
+          
+          // Filter intake logs for current week
+          const weekIntakeLogs = (intakeLogsData || []).filter((log: any) => {
+            const logDate = new Date(log.taken_time);
+            return logDate >= weekStart && logDate < weekEnd;
+          });
+          
+          // Count unique medicine IDs per day that have been marked as "taken"
+          weekIntakeLogs.forEach((log: any) => {
+            const dateStr = log.taken_time.split("T")[0];
+            const daily = weekDailyMap.get(dateStr);
+            if (daily && log.status === "taken") {
+              daily.takenIds.add(log.medicine_id);
+            }
+          });
+          
+          // Calculate average daily adherence from current week
+          const weekDailyAdherenceData = Array.from(weekDailyMap.values()).map((day) => {
+            const takenCount = day.takenIds.size;
+            return totalMedicinesCount > 0 
+              ? Math.round((takenCount / totalMedicinesCount) * 100) 
+              : 0;
+          });
+          
+          const avgDailyAdherence = weekDailyAdherenceData.length > 0
+            ? Math.round(weekDailyAdherenceData.reduce((sum, val) => sum + val, 0) / weekDailyAdherenceData.length)
             : 0;
-
-          const avgMedicineAdherence = medicineAdherenceValues.length > 0
-            ? medicineAdherenceValues.reduce((a, b) => a + b, 0) / medicineAdherenceValues.length
-            : 0;
-
-          const recovery = treatmentStatsData.length > 0 && medicineStats.length > 0
-            ? Math.round((avgTreatmentAdherence + avgMedicineAdherence + overallAdherence) / 3)
+          
+          // Recovery percentage = (average daily adherence + overall adherence) / 2
+          const recovery = weekDailyAdherenceData.length > 0
+            ? Math.round((avgDailyAdherence + overallAdherence) / 2)
             : overallAdherence;
 
           reports.push({
@@ -377,7 +424,7 @@ const AdminReports = () => {
       <aside
         className={`${
           sidebarOpen ? "w-64" : "w-20"
-        } bg-card border-r border-border/50 transition-all duration-300 flex flex-col fixed left-0 top-0 h-screen z-40`}
+        } ${isMobile && !sidebarOpen ? '-translate-x-full' : ''} bg-card border-r border-border/50 transition-all duration-300 flex flex-col fixed left-0 top-0 h-screen z-40`}
       >
         {/* Logo */}
         <div className="p-6 border-b border-border/50 flex items-center justify-between">
@@ -450,12 +497,20 @@ const AdminReports = () => {
       </aside>
 
       {/* Main Content */}
-      <div className={`flex-1 ${sidebarOpen ? "ml-64" : "ml-20"} transition-all duration-300`}>
+      <div className={`flex-1 ${isMobile ? 'ml-0' : sidebarOpen ? "ml-64" : "ml-20"} transition-all duration-300`}>
         {/* Top Navigation */}
         <nav className="bg-card border-b border-border/50 px-4 sm:px-6 md:px-8 py-3 sm:py-4 sticky top-0 z-30 flex items-center justify-between gap-2 sm:gap-4">
-          <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold truncate">Reports</h1>
-            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">Patient reports and analytics</p>
+          <div className="flex items-center gap-2 min-w-0">
+            <button 
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className={`${isMobile ? 'flex' : 'md:hidden'} flex-shrink-0 p-2 hover:bg-accent rounded-lg transition-colors`}
+            >
+              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold truncate">Reports</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 hidden sm:block">Patient reports and analytics</p>
+            </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-4 shrink-0">
             <span className="text-xs sm:text-sm text-muted-foreground hidden sm:inline">
@@ -472,7 +527,7 @@ const AdminReports = () => {
         </nav>
 
         {/* Content */}
-        <div className="p-4 sm:p-6 md:p-8">
+        <div className="p-3 sm:p-4 md:p-6 lg:p-8 mobile-content mobile-text-container max-w-full overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
@@ -611,14 +666,15 @@ const AdminReports = () => {
                       <CardContent className="pt-6">
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-4">
-                            <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${getHealthStatus(selectedReport.adherenceRate).bg}`}>
-                              <Heart className={`w-6 h-6 ${getHealthStatus(selectedReport.adherenceRate).color}`} />
+                            <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${getHealthStatus(selectedReport.recoveryPercentage).bg}`}>
+                              <Heart className={`w-6 h-6 ${getHealthStatus(selectedReport.recoveryPercentage).color}`} />
                             </div>
                             <div>
                               <p className="text-xs text-muted-foreground">Overall Health Status</p>
-                              <p className={`text-lg font-bold ${getHealthStatus(selectedReport.adherenceRate).color}`}>
-                                {getHealthStatus(selectedReport.adherenceRate).label}
+                              <p className={`text-lg font-bold ${getHealthStatus(selectedReport.recoveryPercentage).color}`}>
+                                {getHealthStatus(selectedReport.recoveryPercentage).label}
                               </p>
+                              <p className="text-xs text-muted-foreground mt-1">Based on daily/weekly intake</p>
                             </div>
                           </div>
                           <div className="text-right">
