@@ -329,12 +329,12 @@ const AdminTreatments = () => {
               </div>
 
               {/* Patients Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-7 lg:mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-7 lg:mb-8 max-w-full">
                 {filteredPatients.length > 0 ? (
                   filteredPatients.map((patient) => (
                     <Card
                       key={patient.id}
-                      className={`cursor-pointer transition-all hover:shadow-lg border-2 ${
+                      className={`cursor-pointer transition-all hover:shadow-lg border-2 w-full max-w-full overflow-hidden mobile-card-spacing ${
                         selectedPatient?.id === patient.id
                           ? "border-primary"
                           : "border-border/50"
@@ -342,12 +342,12 @@ const AdminTreatments = () => {
                       onClick={() => handlePatientClick(patient)}
                     >
                       <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <CardTitle className="text-lg">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <CardTitle className="text-base sm:text-lg mobile-header truncate">
                               {patient.full_name || "N/A"}
                             </CardTitle>
-                            <CardDescription className="text-xs">
+                            <CardDescription className="text-xs mobile-text-fix truncate">
                               ID: {patient.id.slice(0, 8)}...
                             </CardDescription>
                           </div>
@@ -358,18 +358,18 @@ const AdminTreatments = () => {
                           />
                         </div>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="max-w-full overflow-hidden">
                         <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Mail className="w-4 h-4 text-muted-foreground" />
-                            <span className="truncate">{patient.email || "N/A"}</span>
+                          <div className="flex items-center gap-2 text-xs sm:text-sm min-w-0">
+                            <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                            <span className="truncate mobile-text-fix">{patient.email || "N/A"}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Phone className="w-4 h-4 text-muted-foreground" />
-                            <span>{patient.phone || "N/A"}</span>
+                          <div className="flex items-center gap-2 text-xs sm:text-sm min-w-0">
+                            <Phone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                            <span className="truncate mobile-text-fix">{patient.phone || "N/A"}</span>
                           </div>
                           {patient.medical_condition && (
-                            <Badge variant="secondary" className="mt-2">
+                            <Badge variant="secondary" className="mt-2 text-xs mobile-text-fix truncate max-w-full">
                               {patient.medical_condition}
                             </Badge>
                           )}
@@ -389,35 +389,35 @@ const AdminTreatments = () => {
 
               {/* Treatments Section */}
               {selectedPatient && (
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden">
                   {/* Patient Summary */}
-                  <Card className="border-primary bg-primary/5">
+                  <Card className="border-primary bg-primary/5 w-full max-w-full overflow-hidden mobile-card-spacing">
                     <CardHeader>
-                      <CardTitle>Selected Patient</CardTitle>
+                      <CardTitle className="mobile-header">Selected Patient</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
-                        <div>
-                          <label className="text-xs sm:text-sm font-medium text-muted-foreground">
+                    <CardContent className="max-w-full overflow-hidden">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-4 max-w-full">
+                        <div className="min-w-0">
+                          <label className="text-xs sm:text-sm font-medium text-muted-foreground mobile-text-fix">
                             Full Name
                           </label>
-                          <p className="text-base sm:text-lg font-semibold mt-1">
+                          <p className="text-sm sm:text-base lg:text-lg font-semibold mt-1 mobile-text-fix truncate">
                             {selectedPatient.full_name}
                           </p>
                         </div>
-                        <div>
-                          <label className="text-xs sm:text-sm font-medium text-muted-foreground">
+                        <div className="min-w-0">
+                          <label className="text-xs sm:text-sm font-medium text-muted-foreground mobile-text-fix">
                             Email
                           </label>
-                          <p className="text-xs sm:text-sm font-semibold mt-1 truncate">
+                          <p className="text-xs sm:text-sm font-semibold mt-1 truncate mobile-text-fix">
                             {selectedPatient.email}
                           </p>
                         </div>
-                        <div>
-                          <label className="text-xs sm:text-sm font-medium text-muted-foreground">
+                        <div className="min-w-0">
+                          <label className="text-xs sm:text-sm font-medium text-muted-foreground mobile-text-fix">
                             Medical Condition
                           </label>
-                          <p className="text-base sm:text-lg font-semibold mt-1">
+                          <p className="text-sm sm:text-base lg:text-lg font-semibold mt-1 mobile-text-fix truncate">
                             {selectedPatient.medical_condition || "N/A"}
                           </p>
                         </div>
@@ -426,8 +426,8 @@ const AdminTreatments = () => {
                   </Card>
 
                   {/* Treatments List */}
-                  <div>
-                    <h2 className="text-xl font-bold mb-4">Patient Treatments</h2>
+                  <div className="max-w-full overflow-hidden">
+                    <h2 className="text-lg sm:text-xl font-bold mb-4 mobile-header">Patient Treatments</h2>
 
                     {loadingTreatments ? (
                       <div className="flex items-center justify-center py-12">
@@ -437,9 +437,9 @@ const AdminTreatments = () => {
                         </div>
                       </div>
                     ) : patientTreatments.length > 0 ? (
-                      <div className="space-y-4">
+                      <div className="space-y-3 sm:space-y-4 max-w-full">
                         {patientTreatments.map((treatment) => (
-                          <Card key={treatment.id} className="border-l-4 border-l-primary">
+                          <Card key={treatment.id} className="border-l-4 border-l-primary w-full max-w-full overflow-hidden mobile-card-spacing">
                             <CardHeader
                               className="pb-3 cursor-pointer hover:bg-secondary/50 transition-colors"
                               onClick={() =>
@@ -448,15 +448,15 @@ const AdminTreatments = () => {
                                 )
                               }
                             >
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <CardTitle className="text-lg flex items-center gap-2">
-                                    <Layers className="w-5 h-5" />
-                                    {treatment.name}
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <CardTitle className="text-base sm:text-lg mobile-header flex items-center gap-2">
+                                    <Layers className="w-4 sm:w-5 h-4 sm:h-5 flex-shrink-0" />
+                                    <span className="truncate">{treatment.name}</span>
                                   </CardTitle>
-                                  <CardDescription>{treatment.description}</CardDescription>
+                                  <CardDescription className="mobile-text-fix line-clamp-2">{treatment.description}</CardDescription>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-shrink-0">
                                   <Badge
                                     variant={
                                       treatment.status === "active"
@@ -508,35 +508,35 @@ const AdminTreatments = () => {
                                   </h3>
 
                                   {treatment.medicines.length > 0 ? (
-                                    <div className="space-y-3">
+                                    <div className="space-y-2 sm:space-y-3 max-w-full">
                                       {treatment.medicines.map((medicine) => (
                                         <Card
                                           key={medicine.id}
-                                          className="bg-secondary/50 border-0"
+                                          className="bg-secondary/50 border-0 w-full max-w-full overflow-hidden"
                                         >
-                                          <CardContent className="p-2 sm:p-3 lg:p-4">
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
-                                              <div>
-                                                <label className="text-xs font-medium text-muted-foreground">
+                                          <CardContent className="p-2 sm:p-3 lg:p-4 max-w-full overflow-hidden">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-4 max-w-full">
+                                              <div className="min-w-0">
+                                                <label className="text-xs font-medium text-muted-foreground mobile-text-fix">
                                                   Medicine Name
                                                 </label>
-                                                <p className="text-sm sm:text-base font-semibold mt-1">
+                                                <p className="text-xs sm:text-sm lg:text-base font-semibold mt-1 mobile-text-fix truncate">
                                                   {medicine.name}
                                                 </p>
                                               </div>
-                                              <div>
-                                                <label className="text-xs font-medium text-muted-foreground">
+                                              <div className="min-w-0">
+                                                <label className="text-xs font-medium text-muted-foreground mobile-text-fix">
                                                   Dosage
                                                 </label>
-                                                <p className="text-sm sm:text-base font-semibold mt-1">
+                                                <p className="text-xs sm:text-sm lg:text-base font-semibold mt-1 mobile-text-fix truncate">
                                                   {medicine.dosage}
                                                 </p>
                                               </div>
-                                              <div>
-                                                <label className="text-xs font-medium text-muted-foreground">
+                                              <div className="min-w-0">
+                                                <label className="text-xs font-medium text-muted-foreground mobile-text-fix">
                                                   Frequency
                                                 </label>
-                                                <p className="font-semibold mt-1">
+                                                <p className="text-xs sm:text-sm lg:text-base font-semibold mt-1 mobile-text-fix truncate">
                                                   {medicine.frequency}
                                                 </p>
                                               </div>
@@ -546,7 +546,7 @@ const AdminTreatments = () => {
                                       ))}
                                     </div>
                                   ) : (
-                                    <p className="text-muted-foreground">
+                                    <p className="text-sm text-muted-foreground mobile-text-fix">
                                       No medicines assigned to this treatment
                                     </p>
                                   )}
