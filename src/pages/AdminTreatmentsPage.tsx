@@ -273,17 +273,17 @@ const AdminTreatmentsPage = () => {
           ) : (
             <>
               {/* Search Bar */}
-              <div className="mb-6">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <div className="mb-4 sm:mb-6 max-w-full">
+                <div className="relative w-full">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground flex-shrink-0" />
                   <Input
-                    placeholder="Search treatments by name, patient, or description..."
+                    placeholder="Search treatments..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-9 sm:pl-10 w-full text-sm sm:text-base"
                   />
                 </div>
-                <p className="text-sm text-muted-foreground mt-2">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-2 mobile-text-fix">
                   Found {filteredTreatments.length} treatment{filteredTreatments.length !== 1 ? "s" : ""}
                 </p>
               </div>
@@ -456,33 +456,33 @@ const AdminTreatmentsPage = () => {
 
               {/* Summary Stats */}
               {filteredTreatments.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-                  <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-500/20">
-                    <CardContent className="p-6">
-                      <label className="text-sm font-medium text-muted-foreground">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-6 sm:mt-8 max-w-full">
+                  <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-500/20 w-full max-w-full overflow-hidden">
+                    <CardContent className="p-4 sm:p-6">
+                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mobile-text-fix">
                         Total Treatments
                       </label>
-                      <p className="text-3xl font-bold mt-2">
+                      <p className="text-2xl sm:text-3xl font-bold mt-2">
                         {filteredTreatments.length}
                       </p>
                     </CardContent>
                   </Card>
-                  <Card className="bg-gradient-to-br from-green-500/10 to-green-600/10 border-green-500/20">
-                    <CardContent className="p-6">
-                      <label className="text-sm font-medium text-muted-foreground">
+                  <Card className="bg-gradient-to-br from-green-500/10 to-green-600/10 border-green-500/20 w-full max-w-full overflow-hidden">
+                    <CardContent className="p-4 sm:p-6">
+                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mobile-text-fix">
                         Active Treatments
                       </label>
-                      <p className="text-3xl font-bold mt-2">
+                      <p className="text-2xl sm:text-3xl font-bold mt-2">
                         {filteredTreatments.filter((t) => t.status === "active").length}
                       </p>
                     </CardContent>
                   </Card>
-                  <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border-purple-500/20">
-                    <CardContent className="p-6">
-                      <label className="text-sm font-medium text-muted-foreground">
+                  <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border-purple-500/20 w-full max-w-full overflow-hidden">
+                    <CardContent className="p-4 sm:p-6">
+                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mobile-text-fix">
                         Total Medicines
                       </label>
-                      <p className="text-3xl font-bold mt-2">
+                      <p className="text-2xl sm:text-3xl font-bold mt-2">
                         {filteredTreatments.reduce((acc, t) => acc + t.medicines.length, 0)}
                       </p>
                     </CardContent>
