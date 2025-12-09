@@ -18,6 +18,8 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
+import "@/styles/mobile-responsive.css";
 
 interface Medicine {
   id: string;
@@ -40,7 +42,8 @@ interface Treatment {
 
 const AdminTreatmentsPage = () => {
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const isMobile = useIsMobile();
+  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [loading, setLoading] = useState(true);
   const [adminEmail, setAdminEmail] = useState("");
   const [treatments, setTreatments] = useState<Treatment[]>([]);
@@ -151,7 +154,7 @@ const AdminTreatmentsPage = () => {
       <aside
         className={`${
           sidebarOpen ? "w-64" : "w-20"
-        } bg-card border-r border-border/50 transition-all duration-300 flex flex-col fixed left-0 top-0 h-screen z-40`}
+        } ${isMobile && !sidebarOpen ? '-translate-x-full' : ''} bg-card border-r border-border/50 transition-all duration-300 flex flex-col fixed left-0 top-0 h-screen z-40`}
       >
         {/* Logo */}
         <div className="p-6 border-b border-border/50 flex items-center justify-between">
@@ -225,12 +228,22 @@ const AdminTreatmentsPage = () => {
       </aside>
 
       {/* Main Content */}
-      <div className={`flex-1 ${sidebarOpen ? "ml-64" : "ml-20"} transition-all duration-300`}>
+      <div className={`flex-1 ${isMobile ? 'ml-0' : sidebarOpen ? "ml-64" : "ml-20"} transition-all duration-300`}>
         {/* Top Navigation */}
-        <nav className="bg-card border-b border-border/50 px-8 py-4 sticky top-0 z-30 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">All Treatments</h1>
-            <p className="text-sm text-muted-foreground">View all treatments and their medicines</p>
+        <nav className="bg-card border-b border-border/50 px-4 sm:px-6 md:px-8 py-3 sm:py-4 sticky top-0 z-30 flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 min-w-0">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className={`${isMobile ? 'flex' : 'md:hidden'} flex-shrink-0`}
+            >
+              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </Button>
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold truncate">All Treatments</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 hidden sm:block">View all treatments and their medicines</p>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
@@ -249,7 +262,7 @@ const AdminTreatmentsPage = () => {
         </nav>
 
         {/* Content */}
-        <div className="p-8">
+        <div className="p-3 sm:p-4 md:p-6 lg:p-8 mobile-content mobile-text-container max-w-full overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
@@ -276,10 +289,10 @@ const AdminTreatmentsPage = () => {
               </div>
 
               {/* Treatments List */}
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4 max-w-full">
                 {filteredTreatments.length > 0 ? (
                   filteredTreatments.map((treatment) => (
-                    <Card key={treatment.id} className="border-l-4 border-l-primary hover:shadow-lg transition-all">
+                    <Card key={treatment.id} className="border-l-4 border-l-primary hover:shadow-lg transition-all w-full max-w-full overflow-hidden mobile-card-spacing">
                       <CardHeader
                         className="pb-3 cursor-pointer hover:bg-secondary/30 transition-colors"
                         onClick={() =>
@@ -288,10 +301,10 @@ const AdminTreatmentsPage = () => {
                           )
                         }
                       >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <CardTitle className="text-lg">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <CardTitle className="text-base sm:text-lg mobile-header truncate">
                                 {treatment.name}
                               </CardTitle>
                               <Badge
@@ -300,14 +313,15 @@ const AdminTreatmentsPage = () => {
                                     ? "default"
                                     : "secondary"
                                 }
+                                className="text-xs"
                               >
                                 {treatment.status}
                               </Badge>
                             </div>
-                            <CardDescription className="mt-2">
+                            <CardDescription className="mt-2 mobile-text-fix truncate">
                               <span className="font-medium">Patient:</span> {treatment.patient_name}
                             </CardDescription>
-                            <CardDescription className="mt-1">
+                            <CardDescription className="mt-1 mobile-text-fix line-clamp-2">
                               {treatment.description}
                             </CardDescription>
                           </div>
@@ -321,34 +335,34 @@ const AdminTreatmentsPage = () => {
 
                       {/* Treatment Details */}
                       {expandedTreatment === treatment.id && (
-                        <CardContent className="border-t pt-6 space-y-6">
+                        <CardContent className="border-t pt-4 sm:pt-6 space-y-4 sm:space-y-6 max-w-full overflow-hidden">
                           {/* Treatment Info */}
-                          <div>
-                            <h3 className="font-semibold text-lg mb-3">Treatment Information</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <label className="text-sm font-medium text-muted-foreground">
+                          <div className="max-w-full">
+                            <h3 className="font-semibold text-base sm:text-lg mb-3 mobile-header">Treatment Information</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-full">
+                              <div className="min-w-0">
+                                <label className="text-xs sm:text-sm font-medium text-muted-foreground mobile-text-fix">
                                   Start Date
                                 </label>
-                                <p className="text-lg font-semibold mt-1">
+                                <p className="text-sm sm:text-base lg:text-lg font-semibold mt-1 mobile-text-fix">
                                   {new Date(treatment.start_date).toLocaleDateString()}
                                 </p>
                               </div>
-                              <div>
-                                <label className="text-sm font-medium text-muted-foreground">
+                              <div className="min-w-0">
+                                <label className="text-xs sm:text-sm font-medium text-muted-foreground mobile-text-fix">
                                   End Date
                                 </label>
-                                <p className="text-lg font-semibold mt-1">
+                                <p className="text-sm sm:text-base lg:text-lg font-semibold mt-1 mobile-text-fix">
                                   {treatment.end_date
                                     ? new Date(treatment.end_date).toLocaleDateString()
                                     : "Ongoing"}
                                 </p>
                               </div>
-                              <div className="md:col-span-2">
-                                <label className="text-sm font-medium text-muted-foreground">
+                              <div className="sm:col-span-2 min-w-0">
+                                <label className="text-xs sm:text-sm font-medium text-muted-foreground mobile-text-fix">
                                   Treatment ID
                                 </label>
-                                <p className="text-sm font-mono mt-1 break-all">
+                                <p className="text-xs sm:text-sm font-mono mt-1 break-all mobile-text-fix">
                                   {treatment.id}
                                 </p>
                               </div>
@@ -356,50 +370,50 @@ const AdminTreatmentsPage = () => {
                           </div>
 
                           {/* Medicines Section */}
-                          <div className="border-t pt-4">
-                            <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                              <Pill className="w-5 h-5 text-primary" />
-                              Medicines for this Treatment
+                          <div className="border-t pt-4 max-w-full overflow-hidden">
+                            <h3 className="font-semibold text-base sm:text-lg mb-3 flex items-center gap-2 mobile-header">
+                              <Pill className="w-4 sm:w-5 h-4 sm:h-5 text-primary flex-shrink-0" />
+                              <span className="truncate">Medicines for this Treatment</span>
                             </h3>
 
                             {treatment.medicines.length > 0 ? (
-                              <div className="space-y-3">
+                              <div className="space-y-2 sm:space-y-3 max-w-full">
                                 {treatment.medicines.map((medicine, idx) => (
                                   <Card
                                     key={medicine.id}
-                                    className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20"
+                                    className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20 w-full max-w-full overflow-hidden"
                                   >
-                                    <CardContent className="p-4">
-                                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                        <div>
-                                          <label className="text-xs font-medium text-muted-foreground">
+                                    <CardContent className="p-3 sm:p-4 max-w-full overflow-hidden">
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 max-w-full">
+                                        <div className="min-w-0">
+                                          <label className="text-xs font-medium text-muted-foreground mobile-text-fix">
                                             #{idx + 1} Medicine Name
                                           </label>
-                                          <p className="font-semibold mt-1">
+                                          <p className="text-xs sm:text-sm font-semibold mt-1 mobile-text-fix truncate">
                                             {medicine.name}
                                           </p>
                                         </div>
-                                        <div>
-                                          <label className="text-xs font-medium text-muted-foreground">
+                                        <div className="min-w-0">
+                                          <label className="text-xs font-medium text-muted-foreground mobile-text-fix">
                                             Dosage
                                           </label>
-                                          <p className="font-semibold mt-1">
+                                          <p className="text-xs sm:text-sm font-semibold mt-1 mobile-text-fix truncate">
                                             {medicine.dosage}
                                           </p>
                                         </div>
-                                        <div>
-                                          <label className="text-xs font-medium text-muted-foreground">
+                                        <div className="min-w-0">
+                                          <label className="text-xs font-medium text-muted-foreground mobile-text-fix">
                                             Frequency
                                           </label>
-                                          <p className="font-semibold mt-1">
+                                          <p className="text-xs sm:text-sm font-semibold mt-1 mobile-text-fix truncate">
                                             {medicine.frequency}
                                           </p>
                                         </div>
-                                        <div>
-                                          <label className="text-xs font-medium text-muted-foreground">
+                                        <div className="min-w-0">
+                                          <label className="text-xs font-medium text-muted-foreground mobile-text-fix">
                                             Medicine ID
                                           </label>
-                                          <p className="text-xs font-mono mt-1 truncate">
+                                          <p className="text-xs font-mono mt-1 truncate mobile-text-fix">
                                             {medicine.id}
                                           </p>
                                         </div>
